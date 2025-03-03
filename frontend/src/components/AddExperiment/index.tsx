@@ -61,7 +61,7 @@ export const AddExperiment: FC<AddExperimentProps> = ({
         <Modal isOpen={isOpen} onClose={onClose}>
             <ModalOverlay />
             <ModalContent>
-                <ModalHeader>Modal Title</ModalHeader>
+                <ModalHeader>Add Experiment</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
                     <VStack
@@ -83,6 +83,7 @@ export const AddExperiment: FC<AddExperimentProps> = ({
                             </FormLabel>
                             <Input
                                 id="name"
+                                data-testid="name"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 focusBorderColor="experiview.emerald"
@@ -94,6 +95,7 @@ export const AddExperiment: FC<AddExperimentProps> = ({
                             <Input
                                 type="date"
                                 id="date"
+                                data-testid="date"
                                 value={date}
                                 onChange={(e) => setDate(e.target.value)}
                                 focusBorderColor="experiview.emerald"
@@ -106,6 +108,7 @@ export const AddExperiment: FC<AddExperimentProps> = ({
                             </FormLabel>
                             <Textarea
                                 id="description"
+                                data-testid="description"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 rows={4}

@@ -106,7 +106,7 @@ export const ExperimentList: FC<ExperimentListProps> = ({ experiments }) => {
                         <ModalCloseButton />
                         <ModalBody>
                             <VStack align="start">
-                                <Text>
+                                <Text data-testid="experiment-id">
                                     <strong>ID:</strong> {selected.id}
                                 </Text>
                                 <Text>
@@ -115,7 +115,7 @@ export const ExperimentList: FC<ExperimentListProps> = ({ experiments }) => {
                                         selected.date
                                     ).toLocaleDateString()}
                                 </Text>
-                                <Text>
+                                <Text data-testid="experiment-description">
                                     <strong>Description:</strong>{" "}
                                     {selected.description}
                                 </Text>
