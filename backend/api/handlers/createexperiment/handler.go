@@ -36,10 +36,6 @@ type ExperimentItem struct {
 	UpdatedAt   string `dynamodbav:"updatedAt" json:"updatedAt"`
 }
 
-type CheckoutSessionResponse struct {
-	URL string `json:"url"`
-}
-
 func NewHandler(logger *slog.Logger, ddbc *dynamodb.Client, tableName string) (Handler, error) {
 	return Handler{
 		logger:    logger,
@@ -93,5 +89,5 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respond.WithJSON(w, nil, http.StatusCreated)
+	respond.WithJSON(w, experimentItem, http.StatusCreated)
 }

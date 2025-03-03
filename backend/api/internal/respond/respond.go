@@ -6,6 +6,11 @@ import (
 )
 
 func WithJSON(w http.ResponseWriter, v any, status int) {
+	// Add CORS headers
+	w.Header().Set("Access-Control-Allow-Origin", "*") // Or specify your origin like "http://localhost:5173"
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, x-api-key")
+
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(status)
 	if err := json.NewEncoder(w).Encode(v); err != nil {
@@ -24,6 +29,11 @@ type Error struct {
 }
 
 func WithError(w http.ResponseWriter, msg string, status int, issues ...string) {
+	// Add CORS headers
+	w.Header().Set("Access-Control-Allow-Origin", "*") // Or specify your origin like "http://localhost:5173"
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, x-api-key")
+
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(status)
 	v := Error{

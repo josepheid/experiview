@@ -76,7 +76,9 @@ func NewCdkStack(scope constructs.Construct, id string, props *CdkStackProps) aw
 		DefaultCorsPreflightOptions: &awsapigateway.CorsOptions{
 			AllowOrigins: awsapigateway.Cors_ALL_ORIGINS(),
 			AllowMethods: awsapigateway.Cors_ALL_METHODS(),
+			AllowHeaders: jsii.Strings("Content-Type", "Authorization", "x-api-key"),
 		},
+
 		ApiKeySourceType: awsapigateway.ApiKeySourceType_HEADER,
 	})
 
