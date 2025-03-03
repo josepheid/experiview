@@ -1,6 +1,6 @@
 import { Container, Text } from "@chakra-ui/react";
 import { ControlBar } from "../ControlBar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Experiment } from "../../types";
 import { ExperimentList } from "../ExperimentList";
 
@@ -19,6 +19,47 @@ export const Experiments = () => {
     const [endDate, setEndDate] = useState<string | undefined>(undefined);
     const [filter, setFilter] = useState<string | undefined>(undefined);
     const [sort, setSort] = useState<string | undefined>(undefined);
+    const [shouldReload, setShouldReload] = useState(false);
+
+    const fetchExperiments = async (
+        filter: string | undefined,
+        startDate: string | undefined,
+        endDate: string | undefined
+    ) => {
+        const apiKey = import.meta.env.VITE_API_KEY;
+        let apiURL = `${import.meta.env.VITE_API_URL}/experiview/experiments`;
+
+        const queryParams = new URLSearchParams();
+        if (filter) queryParams.append("filter", filter);
+        if (startDate) queryParams.append("startDate", startDate);
+        if (endDate) queryParams.append("endDate", endDate);
+
+        if (queryParams.toString()) {
+            apiURL += `?${queryParams.toString()}`;
+        }
+
+        try {
+            const resp = await fetch(apiURL, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-api-key": apiKey as string,
+                },
+            });
+
+            const data = await resp.json();
+
+            setExperiments(data);
+        } catch (error) {
+            console.error("Error fetching experiments:", error);
+        }
+
+        setShouldReload(false);
+    };
+
+    useEffect(() => {
+        if (filter || startDate || endDate)
+            fetchExperiments(filter, startDate, endDate);
+    }, [filter, startDate, endDate, shouldReload]);
 
     const onStartDateChange = (val: string) => {
         setStartDate(val);
@@ -59,7 +100,6 @@ export const Experiments = () => {
         setExperiments(updatedExperiments);
     };
 
-    console.log(experiments);
     return (
         <Container py="1rem" minW={{ base: "100%", md: "80%" }}>
             <Text fontSize={"2rem"} fontWeight={"bold"} py="1rem">
@@ -74,6 +114,7 @@ export const Experiments = () => {
                 onFilterChange={onFilterChange}
                 sortOption={sort}
                 onSortChange={onSortChange}
+                setShouldReload={setShouldReload}
             />
             <ExperimentList experiments={experiments} />
         </Container>

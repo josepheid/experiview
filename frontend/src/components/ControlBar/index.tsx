@@ -11,6 +11,7 @@ import {
     Select,
     Stack,
     useDisclosure,
+    useToast,
 } from "@chakra-ui/react";
 import { AddExperiment } from "../AddExperiment";
 import { FC, useEffect, useState } from "react";
@@ -25,6 +26,7 @@ interface ControlBarProps {
     endDate?: string;
     onStartDateChange: (date: string) => void;
     onEndDateChange: (date: string) => void;
+    setShouldReload: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const ControlBar: FC<ControlBarProps> = ({
@@ -36,9 +38,11 @@ export const ControlBar: FC<ControlBarProps> = ({
     endDate,
     onStartDateChange,
     onEndDateChange,
+    setShouldReload,
 }) => {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [defaultEndDate, setDefaultEndDate] = useState("");
+    const toast = useToast();
 
     useEffect(() => {
         const today = new Date().toISOString().split("T")[0];
@@ -50,18 +54,41 @@ export const ControlBar: FC<ControlBarProps> = ({
 
     const apiURL = `${import.meta.env.VITE_API_URL}/experiview/experiments`;
     const apiKey = import.meta.env.VITE_API_KEY;
-    console.log(apiKey);
 
     const addExperiment = async (experiment: Experiment) => {
-        const response = await fetch(apiURL as string, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "x-api-key": apiKey as string,
-            },
-            body: JSON.stringify(experiment),
-        });
-        console.log(response);
+        try {
+            const response = await fetch(apiURL as string, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-api-key": apiKey as string,
+                },
+                body: JSON.stringify(experiment),
+            });
+            const data = await response.json();
+            if (data.id) {
+                setShouldReload(true);
+
+                toast({
+                    title: "Success!",
+                    description: `Experiment ${data.name} successfully added`,
+                    status: "success",
+                    duration: 5000,
+                    isClosable: true,
+                    position: "top-right",
+                });
+            }
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: `Something went wrong. Please try again. Error: ${error}`,
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+                position: "top-right",
+            });
+        }
+        onClose();
     };
 
     return (
@@ -98,7 +125,7 @@ export const ControlBar: FC<ControlBarProps> = ({
                             </FormLabel>
                             <Input
                                 type="date"
-                                value={startDate}
+                                value={startDate || ""}
                                 onChange={(e) =>
                                     onStartDateChange(e.target.value)
                                 }

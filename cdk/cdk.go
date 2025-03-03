@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
 
 	golambda "github.com/aws/aws-cdk-go/awscdklambdagoalpha/v2"
-	// "github.com/aws/aws-cdk-go/awscdk/v2/awssqs"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
 )
@@ -59,7 +58,17 @@ func NewCdkStack(scope constructs.Construct, id string, props *CdkStackProps) aw
 		},
 	})
 
+	getExperiments := golambda.NewGoFunction(stack, jsii.String("getExperiments"), &golambda.GoFunctionProps{
+		Entry:         jsii.String("../backend/api/handlers/getexperiments/get"),
+		Description:   jsii.String("lambda responsible for fetching experiment records"),
+		InitialPolicy: &[]awsiam.PolicyStatement{},
+		Environment: &map[string]*string{
+			"EXPERIMENTS_TABLE_NAME": experimentsTable.TableName(),
+		},
+	})
+
 	experimentsTable.GrantFullAccess(createExperiment)
+	experimentsTable.GrantFullAccess(getExperiments)
 
 	notFound := golambda.NewGoFunction(stack, jsii.String("notFound"), &golambda.GoFunctionProps{
 		Description: jsii.String("Returns a not found response."),
@@ -95,13 +104,8 @@ func NewCdkStack(scope constructs.Construct, id string, props *CdkStackProps) aw
 	experiments := experiview.AddResource(jsii.String("experiments"), apiResourceOpts)
 	createExperimentPostIntegration := awsapigateway.NewLambdaIntegration(createExperiment, apiLambdaOpts)
 	experiments.AddMethod(jsii.String(http.MethodPost), createExperimentPostIntegration, &awsapigateway.MethodOptions{ApiKeyRequired: jsii.Bool(true)})
-	// The code that defines your stack goes here
-
-	// example resource
-	// queue := awssqs.NewQueue(stack, jsii.String("CdkQueue"), &awssqs.QueueProps{
-	// 	VisibilityTimeout: awscdk.Duration_Seconds(jsii.Number(300)),
-	// })
-
+	getExperimentsGetIntegration := awsapigateway.NewLambdaIntegration(getExperiments, apiLambdaOpts)
+	experiments.AddMethod(jsii.String(http.MethodGet), getExperimentsGetIntegration, &awsapigateway.MethodOptions{ApiKeyRequired: jsii.Bool(true)})
 	return stack
 }
 

@@ -12,28 +12,13 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/google/uuid"
 	"github.com/josepheid/experiview/api/internal/respond"
+	"github.com/josepheid/experiview/api/models"
 )
 
 type Handler struct {
 	logger    *slog.Logger
 	ddbc      *dynamodb.Client
 	tableName string
-}
-
-type CreateExperimentRequest struct {
-	Name        string `json:"name"`
-	Date        string `json:"date"`
-	Description string `json:"description"`
-}
-
-type ExperimentItem struct {
-	PK          string `dynamodbav:"PK" json:"PK"` // ID
-	SK          string `dynamodbav:"SK" json:"SK"` // Date
-	Name        string `dynamodbav:"name" json:"name"`
-	Description string `dynamodbav:"description" json:"description"`
-	Type        string `dynamodbav:"type" json:"type"`
-	CreatedAt   string `dynamodbav:"createdAt" json:"createdAt"`
-	UpdatedAt   string `dynamodbav:"updatedAt" json:"updatedAt"`
 }
 
 func NewHandler(logger *slog.Logger, ddbc *dynamodb.Client, tableName string) (Handler, error) {
@@ -45,7 +30,7 @@ func NewHandler(logger *slog.Logger, ddbc *dynamodb.Client, tableName string) (H
 }
 
 func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var request CreateExperimentRequest
+	var request models.CreateExperimentRequest
 	err := json.NewDecoder(r.Body).Decode(&request)
 
 	h.logger.Info("Incoming request", "requestBody", request)
@@ -60,7 +45,7 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 	createdAt, updatedAt := now, now
 
-	experimentItem := ExperimentItem{
+	experimentItem := models.ExperimentItem{
 		PK:          experimentID.String(),
 		SK:          request.Date,
 		Name:        request.Name,
