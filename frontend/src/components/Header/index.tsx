@@ -1,4 +1,4 @@
-import { Box, Container, HStack, Image, Text } from "@chakra-ui/react";
+import { Container, Image, Text, VStack } from "@chakra-ui/react";
 
 export const Header = () => {
     return (
@@ -6,8 +6,8 @@ export const Header = () => {
             maxWidth={{ base: "100%" }}
             backgroundColor={"experiview.emerald"}
         >
-            <Box as="header">
-                <HStack p="1rem">
+            <Container as="header" width={"80%"}>
+                <VStack p="1rem">
                     <Image src="/novologo.svg" />
                     <Text
                         color="experiview.blue"
@@ -16,8 +16,8 @@ export const Header = () => {
                     >
                         Experiview
                     </Text>
-                </HStack>
-            </Box>
+                </VStack>
+            </Container>
         </Container>
     );
 };
