@@ -57,19 +57,25 @@ export const Experiments = () => {
     };
 
     useEffect(() => {
-        if (filter || startDate || endDate)
-            fetchExperiments(filter, startDate, endDate);
+        if (shouldReload && (filter || startDate || endDate)) {
+            fetchExperiments(filter, startDate, endDate).then(() =>
+                setShouldReload(false)
+            );
+        }
     }, [filter, startDate, endDate, shouldReload]);
 
     const onStartDateChange = (val: string) => {
+        setShouldReload(true);
         setStartDate(val);
     };
 
     const onEndDateChange = (val: string) => {
+        setShouldReload(true);
         setEndDate(val);
     };
 
     const onFilterChange = (val: string) => {
+        setShouldReload(true);
         setFilter(val);
     };
 
