@@ -1,7 +1,14 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/aws/aws-cdk-go/awscdk/v2"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awsapigateway"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awsdynamodb"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
+
+	golambda "github.com/aws/aws-cdk-go/awscdklambdagoalpha/v2"
 	// "github.com/aws/aws-cdk-go/awscdk/v2/awssqs"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
@@ -18,6 +25,59 @@ func NewCdkStack(scope constructs.Construct, id string, props *CdkStackProps) aw
 	}
 	stack := awscdk.NewStack(scope, &id, &sprops)
 
+	experimentsTable := awsdynamodb.NewTableV2(stack, jsii.String("experimentsTable"), &awsdynamodb.TablePropsV2{
+		PartitionKey: &awsdynamodb.Attribute{
+			Name: jsii.String("PK"),
+			Type: awsdynamodb.AttributeType_STRING,
+		},
+		SortKey: &awsdynamodb.Attribute{
+			Name: jsii.String("SK"),
+			Type: awsdynamodb.AttributeType_STRING,
+		},
+	})
+
+	// Allow querying all experiments by date
+	experimentsTable.AddGlobalSecondaryIndex(&awsdynamodb.GlobalSecondaryIndexPropsV2{
+		IndexName: jsii.String("allExperimentsIndex"),
+		PartitionKey: &awsdynamodb.Attribute{
+			Name: jsii.String("type"),
+			Type: awsdynamodb.AttributeType_STRING,
+		},
+		SortKey: &awsdynamodb.Attribute{
+			Name: jsii.String("SK"),
+			Type: awsdynamodb.AttributeType_STRING,
+		},
+		ProjectionType: awsdynamodb.ProjectionType_ALL,
+	})
+
+	createExperiment := golambda.NewGoFunction(stack, jsii.String("createExperiment"), &golambda.GoFunctionProps{
+		Entry:         jsii.String("../backend/api/handlers/createexperiment/post"),
+		Description:   jsii.String("lambda responsible for creating experiment records"),
+		InitialPolicy: &[]awsiam.PolicyStatement{},
+		Environment: &map[string]*string{
+			"EXPERIMENTS_TABLE_NAME": experimentsTable.TableName(),
+		},
+	})
+
+	experimentsTable.GrantFullAccess(createExperiment)
+
+	notFound := golambda.NewGoFunction(stack, jsii.String("notFound"), &golambda.GoFunctionProps{
+		Description: jsii.String("Returns a not found response."),
+		Entry:       jsii.String("../backend/api/handlers/notfound"),
+		MemorySize:  jsii.Number(128),
+	})
+
+	apiResourceOpts := &awsapigateway.ResourceOptions{}
+	apiLambdaOpts := &awsapigateway.LambdaIntegrationOptions{}
+	api := awsapigateway.NewLambdaRestApi(stack, jsii.String("experiview-api"), &awsapigateway.LambdaRestApiProps{
+		CloudWatchRole: jsii.Bool(false),
+		Handler:        notFound,
+		Proxy:          jsii.Bool(false),
+	})
+	experiview := api.Root().AddResource(jsii.String("experiview"), apiResourceOpts)
+	experiments := experiview.AddResource(jsii.String("experiments"), apiResourceOpts)
+	createExperimentPostIntegration := awsapigateway.NewLambdaIntegration(createExperiment, apiLambdaOpts)
+	experiments.AddMethod(jsii.String(http.MethodPost), createExperimentPostIntegration, &awsapigateway.MethodOptions{ApiKeyRequired: jsii.Bool(true)})
 	// The code that defines your stack goes here
 
 	// example resource
@@ -33,7 +93,7 @@ func main() {
 
 	app := awscdk.NewApp(nil)
 
-	NewCdkStack(app, "CdkStack", &CdkStackProps{
+	NewCdkStack(app, "ExperiviewStack", &CdkStackProps{
 		awscdk.StackProps{
 			Env: env(),
 		},
