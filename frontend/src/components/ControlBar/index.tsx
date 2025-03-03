@@ -48,12 +48,20 @@ export const ControlBar: FC<ControlBarProps> = ({
         }
     }, [endDate, onEndDateChange]);
 
-    const addExperiment = (experiment: Experiment) => {
-        console.log(experiment);
-        // setExperiments([
-        //     ...experiments,
-        //     { ...experiment, id: Date.now().toString() },
-        // ]);
+    const apiURL = `${import.meta.env.VITE_API_URL}/experiview/experiments`;
+    const apiKey = import.meta.env.VITE_API_KEY;
+    console.log(apiKey);
+
+    const addExperiment = async (experiment: Experiment) => {
+        const response = await fetch(apiURL as string, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "x-api-key": apiKey as string,
+            },
+            body: JSON.stringify(experiment),
+        });
+        console.log(response);
     };
 
     return (
