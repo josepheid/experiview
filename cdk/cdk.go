@@ -73,7 +73,22 @@ func NewCdkStack(scope constructs.Construct, id string, props *CdkStackProps) aw
 		CloudWatchRole: jsii.Bool(false),
 		Handler:        notFound,
 		Proxy:          jsii.Bool(false),
+		DefaultCorsPreflightOptions: &awsapigateway.CorsOptions{
+			AllowOrigins: awsapigateway.Cors_ALL_ORIGINS(),
+			AllowMethods: awsapigateway.Cors_ALL_METHODS(),
+		},
+		ApiKeySourceType: awsapigateway.ApiKeySourceType_HEADER,
 	})
+
+	apiKey := awsapigateway.NewApiKey(stack, jsii.String("experiview-apikey"), &awsapigateway.ApiKeyProps{})
+
+	usagePlan := awsapigateway.NewUsagePlan(stack, jsii.String("experiview-usagePlan"), &awsapigateway.UsagePlanProps{
+		Name:      jsii.String("ExperiviewUsagePlan"),
+		ApiStages: &[]*awsapigateway.UsagePlanPerApiStage{{Api: api, Stage: api.DeploymentStage()}},
+	})
+
+	usagePlan.AddApiKey(apiKey, &awsapigateway.AddApiKeyOptions{})
+
 	experiview := api.Root().AddResource(jsii.String("experiview"), apiResourceOpts)
 	experiments := experiview.AddResource(jsii.String("experiments"), apiResourceOpts)
 	createExperimentPostIntegration := awsapigateway.NewLambdaIntegration(createExperiment, apiLambdaOpts)

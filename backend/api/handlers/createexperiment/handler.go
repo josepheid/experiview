@@ -31,9 +31,9 @@ type ExperimentItem struct {
 	SK          string `dynamodbav:"SK" json:"SK"` // Date
 	Name        string `dynamodbav:"name" json:"name"`
 	Description string `dynamodbav:"description" json:"description"`
-	Type        string `json:"type" json:"type"`
-	CreatedAt   string `json:"createdAt" json:"createdAt"`
-	UpdatedAt   string `json:"updatedAt" json:"updatedAt"`
+	Type        string `dynamodbav:"type" json:"type"`
+	CreatedAt   string `dynamodbav:"createdAt" json:"createdAt"`
+	UpdatedAt   string `dynamodbav:"updatedAt" json:"updatedAt"`
 }
 
 type CheckoutSessionResponse struct {
