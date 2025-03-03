@@ -33,7 +33,7 @@ func main() {
 
 	ddbc := dynamodb.NewFromConfig(config)
 
-	h, err := getexperiments.NewHandler(logger, upfrontTableName, ddbc)
+	h, err := getexperiments.NewHandler(logger, upfrontTableName, ddbc.Query)
 	if err != nil {
 		logger.Error("could not create handler", slog.Any("error", err))
 		os.Exit(1)

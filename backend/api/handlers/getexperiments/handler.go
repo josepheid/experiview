@@ -17,14 +17,14 @@ import (
 type Handler struct {
 	logger    *slog.Logger
 	tableName string
-	ddbc      *dynamodb.Client
+	Query     func(ctx context.Context, params *dynamodb.QueryInput, optFns ...func(*dynamodb.Options)) (*dynamodb.QueryOutput, error)
 }
 
-func NewHandler(logger *slog.Logger, tableName string, ddbc *dynamodb.Client) (Handler, error) {
+func NewHandler(logger *slog.Logger, tableName string, query func(ctx context.Context, params *dynamodb.QueryInput, optFns ...func(*dynamodb.Options)) (*dynamodb.QueryOutput, error)) (Handler, error) {
 	return Handler{
 		logger:    logger,
 		tableName: tableName,
-		ddbc:      ddbc,
+		Query:     query,
 	}, nil
 }
 
@@ -55,7 +55,7 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Query DynamoDB
-	data, err := h.ddbc.Query(context.TODO(), &dynamodb.QueryInput{
+	data, err := h.Query(context.TODO(), &dynamodb.QueryInput{
 		TableName:                 aws.String(h.tableName),
 		IndexName:                 aws.String("allExperimentsIndex"),
 		ExpressionAttributeNames:  expr.Names(),

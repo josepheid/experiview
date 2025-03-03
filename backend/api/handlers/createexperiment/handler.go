@@ -17,14 +17,14 @@ import (
 
 type Handler struct {
 	logger    *slog.Logger
-	ddbc      *dynamodb.Client
+	PutItem   func(ctx context.Context, params *dynamodb.PutItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error)
 	tableName string
 }
 
-func NewHandler(logger *slog.Logger, ddbc *dynamodb.Client, tableName string) (Handler, error) {
+func NewHandler(logger *slog.Logger, putItem func(ctx context.Context, params *dynamodb.PutItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error), tableName string) (Handler, error) {
 	return Handler{
 		logger:    logger,
-		ddbc:      ddbc,
+		PutItem:   putItem,
 		tableName: tableName,
 	}, nil
 }
@@ -63,7 +63,7 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = h.ddbc.PutItem(context.TODO(), &dynamodb.PutItemInput{
+	_, err = h.PutItem(context.TODO(), &dynamodb.PutItemInput{
 		TableName: aws.String(h.tableName),
 		Item:      data,
 	})
