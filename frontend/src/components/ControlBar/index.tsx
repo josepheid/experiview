@@ -96,28 +96,31 @@ export const ControlBar: FC<ControlBarProps> = ({
             <Stack
                 direction={{ base: "column", sm: "row" }}
                 spacing={4}
-                align="center"
                 justify="space-between"
                 mb={6}
             >
-                <InputGroup maxW={{ base: "full", sm: "30%" }}>
-                    <InputLeftElement pointerEvents="none">
-                        <SearchIcon color="gray.400" />
-                    </InputLeftElement>
-                    <Input
-                        type="text"
-                        placeholder="Filter experiments..."
-                        value={filterText}
-                        onChange={(e) => onFilterChange(e.target.value)}
-                        focusBorderColor="experiview.emerald"
-                    />
-                </InputGroup>
+                {/* Left: Search Input */}
                 <Flex
+                    flex="1"
                     direction={{ base: "column", sm: "row" }}
+                    align={{ base: "flex-start", md: "flex-end" }}
                     gap={3}
-                    align={{ base: "stretch", sm: "center" }}
-                    w={{ base: "full", md: "auto" }}
                 >
+                    <InputGroup maxW={{ base: "full", sm: "40%" }}>
+                        <InputLeftElement pointerEvents="none">
+                            <SearchIcon color="gray.400" />
+                        </InputLeftElement>
+                        <Input
+                            type="text"
+                            placeholder="Filter experiments..."
+                            value={filterText}
+                            onChange={(e) => onFilterChange(e.target.value)}
+                            focusBorderColor="experiview.emerald"
+                            size={"sm"}
+                        />
+                    </InputGroup>
+
+                    {/* Date Filters */}
                     <Box>
                         <FormControl size="sm">
                             <FormLabel fontSize="xs" mb={1}>
@@ -152,18 +155,19 @@ export const ControlBar: FC<ControlBarProps> = ({
                             />
                         </FormControl>
                     </Box>
+                    <Select
+                        maxW={{ base: "full", sm: "30%" }}
+                        value={sortOption}
+                        onChange={(e) => onSortChange(e.target.value)}
+                        focusBorderColor="experiview.emerald"
+                        size="sm"
+                    >
+                        <option value="dateDesc">Newest First</option>
+                        <option value="dateAsc">Oldest First</option>
+                        <option value="titleAsc">Title (A-Z)</option>
+                        <option value="titleDesc">Title (Z-A)</option>
+                    </Select>
                 </Flex>
-                <Select
-                    maxW={{ base: "full", sm: "30%" }}
-                    value={sortOption}
-                    onChange={(e) => onSortChange(e.target.value)}
-                    focusBorderColor="experiview.emerald"
-                >
-                    <option value="dateDesc">Newest First</option>
-                    <option value="dateAsc">Oldest First</option>
-                    <option value="titleAsc">Title (A-Z)</option>
-                    <option value="titleDesc">Title (Z-A)</option>
-                </Select>
             </Stack>
             <Button
                 backgroundColor={"experiview.blue"}
@@ -173,6 +177,7 @@ export const ControlBar: FC<ControlBarProps> = ({
                     color: "white",
                 }}
                 onClick={onOpen}
+                size="sm"
             >
                 <AddIcon mr={"0.5rem"} />
                 New Experiment
