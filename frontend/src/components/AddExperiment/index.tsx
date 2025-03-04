@@ -99,6 +99,7 @@ export const AddExperiment: FC<AddExperimentProps> = ({
                                 value={date}
                                 onChange={(e) => setDate(e.target.value)}
                                 focusBorderColor="experiview.emerald"
+                                max={new Date().toISOString().split("T")[0]}
                             />
                         </FormControl>
 

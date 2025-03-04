@@ -9,6 +9,9 @@ export const Experiments = () => {
     const [startDate, setStartDate] = useState<string | undefined>(undefined);
     const [endDate, setEndDate] = useState<string | undefined>(undefined);
     const [filter, setFilter] = useState<string | undefined>(undefined);
+    const [debouncedFilter, setDebouncedFilter] = useState<string | undefined>(
+        undefined
+    );
     const [sort, setSort] = useState<string>("dateDesc");
     const [shouldReload, setShouldReload] = useState(false);
     const toast = useToast();
@@ -30,7 +33,7 @@ export const Experiments = () => {
 
     useEffect(() => {
         const fetchExperiments = async (
-            filter: string | undefined,
+            debouncedFilter: string | undefined,
             startDate: string | undefined,
             endDate: string | undefined
         ) => {
@@ -40,7 +43,7 @@ export const Experiments = () => {
             }/experiview/experiments`;
 
             const queryParams = new URLSearchParams();
-            if (filter) queryParams.append("filter", filter);
+            if (debouncedFilter) queryParams.append("filter", debouncedFilter);
             if (startDate) queryParams.append("startDate", startDate);
             if (endDate) queryParams.append("endDate", endDate);
 
@@ -75,15 +78,24 @@ export const Experiments = () => {
             setShouldReload(false);
         };
         if (shouldReload) {
-            fetchExperiments(filter, startDate, endDate).then(() =>
+            fetchExperiments(debouncedFilter, startDate, endDate).then(() =>
                 setShouldReload(false)
             );
         }
-    }, [filter, startDate, endDate, shouldReload, sort, toast]);
+    }, [debouncedFilter, startDate, endDate, shouldReload, sort, toast]);
 
     useEffect(() => {
         setExperiments((prev) => sortExperiments(prev, sort));
     }, [sort]);
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedFilter(filter); // Update after 2 seconds
+            setShouldReload(true);
+        }, 750);
+
+        return () => clearTimeout(handler); // Clear timeout if user types again
+    }, [filter]);
 
     const onStartDateChange = (val: string) => {
         setShouldReload(true);
@@ -96,7 +108,6 @@ export const Experiments = () => {
     };
 
     const onFilterChange = (val: string) => {
-        setShouldReload(true);
         setFilter(val);
     };
 

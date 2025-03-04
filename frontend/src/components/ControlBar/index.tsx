@@ -99,7 +99,6 @@ export const ControlBar: FC<ControlBarProps> = ({
                 justify="space-between"
                 mb={6}
             >
-                {/* Left: Search Input */}
                 <Flex
                     flex="1"
                     direction={{ base: "column", sm: "row" }}
@@ -120,7 +119,6 @@ export const ControlBar: FC<ControlBarProps> = ({
                         />
                     </InputGroup>
 
-                    {/* Date Filters */}
                     <Box>
                         <FormControl size="sm">
                             <FormLabel fontSize="xs" mb={1}>
